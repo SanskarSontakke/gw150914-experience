@@ -5,7 +5,7 @@
 This project bridges theoretical astrophysics and modern web accessibility by translating the raw, time-series data of the first observed binary black hole merger (GW150914) into a synchronized audio and haptic experience. It is designed to be experienced directly on consumer Android smartphones via a web browser, requiring zero setup or app installations.
 
 ## 🚀 Live Demo
-**Experience it here:** [Link to your GitHub Pages site - e.g., https://yourusername.github.io/gw150914-experience] 
+**Experience it here:** [Link to your GitHub Pages site - e.g., https://sanskarsontakke.github.io/gw150914-experience] 
 *(Note: For the haptic vibration to work, you must open this link on an **Android smartphone**.)*
 
 ## 📖 Project Overview
