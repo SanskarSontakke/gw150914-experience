@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GW150914 Experience</title>
+    <style>
+        /* UI/UX Design: High-contrast dark mode based on APCA standards */
+        :root {
+            --bg-color: #121212;
+            --text-high: rgba(255, 255, 255, 0.87);
+            --text-med: rgba(255, 255, 255, 0.60);
+            --accent: #00e5ff;
+            --accent-hover: #00b3cc;
+            --disabled-bg: #333333;
+            --disabled-text: rgba(255, 255, 255, 0.38);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-high);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        p.description {
+            color: var(--text-med);
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        /* Prominent Action Button */
+        button {
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--accent);
+            color: #000; /* Max contrast against bright accent */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
+            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.97);
+            background-color: var(--accent-hover);
+        }
+
+        button:disabled {
+            background-color: var(--disabled-bg);
+            color: var(--disabled-text);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-med);
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>GW150914</h1>
+        <p class="description">
+            Experience the collision of two black holes. You will hear and physically feel the exact gravitational waves they sent rippling through spacetime.
+        </p>
+        
+        <button id="experience-btn" disabled>Loading Data...</button>
+        <div id="status-text" class="status">Connecting to waveform data...</div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const button = document.getElementById('experience-btn');
+            const statusText = document.getElementById('status-text');
+            
+            // Core Assets
+            const AUDIO_FILE = 'gw150914_shifted_chirp.wav';
+            const HAPTIC_FILE = 'gw150914_haptic_pattern.json';
+            
+            let hapticArray = [];
+            let hapticSupportAlerted = false;
+            
+            // 1. Set up the HTML5 Audio object
+            const audioObj = new Audio(AUDIO_FILE);
+            audioObj.preload = 'auto';
+
+            // 2. Fetch the JSON array for haptics
+            async function loadData() {
+                try {
+                    const response = await fetch(HAPTIC_FILE);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    hapticArray = await response.json();
+                    
+                    // State Management: Enable button once data is ready
+                    button.disabled = false;
+                    button.textContent = "Experience GW150914";
+                    statusText.textContent = "Data loaded. Ready to play.";
+                    
+                } catch (error) {
+                    console.error("Failed to load haptic data:", error);
+                    statusText.textContent = "Error loading data. Ensure files are uploaded.";
+                    // We'll still enable the button to let them try the audio fallback
+                    button.disabled = false;
+                    button.textContent = "Play Audio Only";
+                }
+            }
+
+            // 3. The Synchronization Engine
+            button.addEventListener('click', () => {
+                // Error Handling for iOS / Unsupported devices
+                const isVibrateSupported = 'vibrate' in navigator;
+                
+                if (!isVibrateSupported && !hapticSupportAlerted) {
+                    alert("Notice: Your device or browser does not support the Web Haptic API. You will experience the audio portion only.");
+                    hapticSupportAlerted = true; // Only alert once
+                }
+
+                // Reset audio to start in case user presses play multiple times
+                audioObj.currentTime = 0;
+                
+                // Fire Audio
+                audioObj.play().catch(e => {
+                    console.error("Audio playback failed:", e);
+                    alert("Audio playback blocked. Please ensure your phone is not on silent.");
+                });
+
+                // Fire Haptics simultaneously
+                if (isVibrateSupported && hapticArray.length > 0) {
+                    navigator.vibrate(hapticArray);
+                }
+                
+                statusText.textContent = "Experiencing merger...";
+                
+                // Reset status text after 15 seconds
+                setTimeout(() => {
+                    statusText.textContent = "Data loaded. Ready to play.";
+                }, 15000);
+            });
+
+            // Initialize fetch
+            loadData();
+        });
+    </script>
+</body>
+</html>
