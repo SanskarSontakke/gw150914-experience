@@ -216,7 +216,7 @@
             const bh1 = document.getElementById('bh1');
             const bh2 = document.getElementById('bh2');
             
-            // Assets
+            // Core Assets
             const AUDIO_FILE = 'gw150914_shifted_chirp.wav';
             const audioObj = new Audio(AUDIO_FILE);
             audioObj.preload = 'auto';
@@ -230,15 +230,16 @@
             
             let isVibrateSupported = 'vibrate' in navigator;
             let animationFrameId = null;
+            let hapticInterval = null; // New real-time haptic sync loop
 
             // Fetch Data
             async function loadData() {
                 try {
-                    // Try fetching haptics
-                    const hapticRes = await fetch('gw150914_haptic_pattern.json');
+                    // Fetch the NEW floating point intensity array
+                    const hapticRes = await fetch('gw150914_haptic_envelope.json');
                     if (hapticRes.ok) hapticArray = await hapticRes.json();
                     
-                    // Try fetching metadata
+                    // Fetch metadata
                     const metaRes = await fetch('metadata.json');
                     if (metaRes.ok) metadata = await metaRes.json();
 
@@ -251,7 +252,33 @@
                 }
             }
 
-            // Sync Engine: Animation Loop
+            // Real-Time Haptic Sync Engine
+            function syncHaptics() {
+                // Stop the loop if audio pauses or finishes
+                if (audioObj.paused || audioObj.ended) {
+                    clearInterval(hapticInterval);
+                    return;
+                }
+
+                // Derive the exact current array index (20 samples per second)
+                let index = Math.floor(audioObj.currentTime * 20);
+                
+                if (index < hapticArray.length) {
+                    let intensity = hapticArray[index];
+                    
+                    if (intensity !== undefined) {
+                        // Calculate vibration duration for this exact 50ms window
+                        let vibeTime = Math.round(intensity * 50);
+                        
+                        // Fire the motor
+                        if (vibeTime > 0) {
+                            navigator.vibrate(vibeTime);
+                        }
+                    }
+                }
+            }
+
+            // Visual Sync Engine: UI Animation Loop
             function syncLoop() {
                 const t = audioObj.currentTime;
                 const mStart = metadata.merger[0];
@@ -267,10 +294,10 @@
                     bh1.classList.remove('pulsing');
                     bh2.style.opacity = '1';
                     
-                    // Math for orbit: speed increases and radius shrinks exponentially as t approaches mStart
+                    // Math for orbit: speed increases and radius shrinks exponentially
                     const progress = Math.min(t / mStart, 1); 
-                    const radius = maxR * Math.pow(1 - progress, 0.35); // Shrinks curve
-                    const theta = 120 * Math.pow(progress, 4); // Spins exponentially faster
+                    const radius = maxR * Math.pow(1 - progress, 0.35); 
+                    const theta = 120 * Math.pow(progress, 4); 
 
                     bh1.style.transform = `translate(${radius * Math.cos(theta)}px, ${radius * Math.sin(theta)}px) scale(1)`;
                     bh2.style.transform = `translate(${radius * Math.cos(theta + Math.PI)}px, ${radius * Math.sin(theta + Math.PI)}px) scale(1)`;
@@ -294,7 +321,7 @@
                     
                     bh2.style.opacity = '0';
                     bh1.style.transform = `translate(0px, 0px)`;
-                    bh1.classList.add('pulsing'); // CSS handles the pulsing scale
+                    bh1.classList.add('pulsing'); 
                 }
 
                 // Continue loop if playing
@@ -313,6 +340,10 @@
                 bh2.style.opacity = '1';
                 bh1.style.transform = `translate(${110}px, 0px) scale(1)`;
                 bh2.style.transform = `translate(${-110}px, 0px) scale(1)`;
+                
+                // Clear hardware intervals
+                if (hapticInterval) clearInterval(hapticInterval);
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
             }
 
             // Initialization & Interaction
@@ -323,14 +354,16 @@
                 }
 
                 // Reset state
-                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                resetUI();
                 audioObj.currentTime = 0;
                 
-                // Fire Audio & Haptics Simultaneously
+                // Fire Audio & Start Synchronization Engines
                 audioObj.play().then(() => {
-                    if ('vibrate' in navigator && hapticArray.length > 0) {
-                        navigator.vibrate(hapticArray);
+                    // 1. Start continuous 50ms PWM Haptic Engine
+                    if (isVibrateSupported && hapticArray.length > 0) {
+                        hapticInterval = setInterval(syncHaptics, 50);
                     }
+                    // 2. Start Visuals
                     animationFrameId = requestAnimationFrame(syncLoop);
                 }).catch(e => {
                     console.error("Playback blocked:", e);
