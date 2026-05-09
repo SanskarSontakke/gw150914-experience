@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GW150914 Experience</title>
     <style>
-        /* UI/UX Design: High-contrast dark mode based on APCA standards */
         :root {
             --bg-color: #121212;
             --text-high: rgba(255, 255, 255, 0.87);
             --text-med: rgba(255, 255, 255, 0.60);
             --accent: #00e5ff;
-            --accent-hover: #00b3cc;
+            --accent-glow: rgba(0, 229, 255, 0.6);
             --disabled-bg: #333333;
             --disabled-text: rgba(255, 255, 255, 0.38);
         }
@@ -23,38 +22,144 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        body {
+        body, html {
             background-color: var(--bg-color);
             color: var(--text-high);
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 24px;
-            text-align: center;
+            overflow: hidden;
         }
 
         .container {
-            max-width: 400px;
             width: 100%;
+            max-width: 400px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.1s ease;
+            position: relative;
+        }
+
+        /* Screen Shake for Merger Phase */
+        @keyframes screenShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+            20% { transform: translate(-3px, 0px) rotate(0.5deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(0.5deg); }
+            50% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-0.5deg); }
+            80% { transform: translate(-1px, -1px) rotate(0.5deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-0.5deg); }
+        }
+
+        .merger-active {
+            animation: screenShake 0.1s infinite;
+        }
+
+        /* Ambient Glow for Merger */
+        .merger-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw;
+            height: 150vh;
+            background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, rgba(18,18,18,0) 70%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+            z-index: -1;
+        }
+
+        .merger-active .merger-glow {
+            opacity: 1;
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        p.description {
-            color: var(--text-med);
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 40px;
+        /* Orbital Visualizer */
+        .visualizer {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 40px 0;
+            border-radius: 50%;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Prominent Action Button */
+        .black-hole {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px var(--accent-glow);
+            top: 50%;
+            left: 50%;
+            margin-top: -12px;
+            margin-left: -12px;
+            transition: opacity 0.2s, transform 0s; /* JS handles transform frame-by-frame */
+        }
+
+        /* Ringdown Pulse Animation */
+        @keyframes ringdownPulse {
+            0% { transform: scale(1.5); box-shadow: 0 0 20px #fff, 0 0 50px var(--accent); opacity: 1; }
+            100% { transform: scale(1.0); box-shadow: 0 0 5px #fff, 0 0 15px var(--accent-glow); opacity: 0.6; }
+        }
+
+        .pulsing {
+            animation: ringdownPulse 0.8s cubic-bezier(0.1, 0.7, 0.1, 1) infinite alternate;
+        }
+
+        /* Live Telemetry Display */
+        .telemetry-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            width: 100%;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .telemetry-text {
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .merger-text {
+            color: #fff;
+            text-shadow: 0 0 8px var(--accent);
+            font-size: 15px;
+        }
+
+        /* Action Button */
         button {
             width: 100%;
             padding: 18px 24px;
@@ -63,16 +168,18 @@
             border: none;
             border-radius: 12px;
             background-color: var(--accent);
-            color: #000; /* Max contrast against bright accent */
+            color: #000;
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
-            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+            touch-action: manipulation;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         button:active:not(:disabled) {
             transform: scale(0.97);
-            background-color: var(--accent-hover);
+            background-color: #00b3cc;
         }
 
         button:disabled {
@@ -80,101 +187,161 @@
             color: var(--disabled-text);
             cursor: not-allowed;
             box-shadow: none;
-            transform: none;
-        }
-
-        .status {
-            margin-top: 16px;
-            font-size: 14px;
-            color: var(--text-med);
-            min-height: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="main-container">
+        <div class="merger-glow"></div>
         <h1>GW150914</h1>
-        <p class="description">
-            Experience the collision of two black holes. You will hear and physically feel the exact gravitational waves they sent rippling through spacetime.
-        </p>
+        
+        <div class="visualizer" id="visualizer">
+            <div class="black-hole" id="bh1"></div>
+            <div class="black-hole" id="bh2"></div>
+        </div>
+
+        <div class="telemetry-box">
+            <div class="telemetry-text" id="telemetry">SYSTEM STANDBY<br>AWAITING DATA</div>
+        </div>
         
         <button id="experience-btn" disabled>Loading Data...</button>
-        <div id="status-text" class="status">Connecting to waveform data...</div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const button = document.getElementById('experience-btn');
-            const statusText = document.getElementById('status-text');
+            const btn = document.getElementById('experience-btn');
+            const telemetry = document.getElementById('telemetry');
+            const container = document.getElementById('main-container');
+            const bh1 = document.getElementById('bh1');
+            const bh2 = document.getElementById('bh2');
             
-            // Core Assets
+            // Assets
             const AUDIO_FILE = 'gw150914_shifted_chirp.wav';
-            const HAPTIC_FILE = 'gw150914_haptic_pattern.json';
-            
-            let hapticArray = [];
-            let hapticSupportAlerted = false;
-            
-            // 1. Set up the HTML5 Audio object
             const audioObj = new Audio(AUDIO_FILE);
             audioObj.preload = 'auto';
 
-            // 2. Fetch the JSON array for haptics
+            let hapticArray = [];
+            let metadata = {
+                inspiral: [0.0, 13.8],
+                merger: [13.8, 14.2],
+                ringdown: [14.2, 15.0]
+            };
+            
+            let isVibrateSupported = 'vibrate' in navigator;
+            let animationFrameId = null;
+
+            // Fetch Data
             async function loadData() {
                 try {
-                    const response = await fetch(HAPTIC_FILE);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    hapticArray = await response.json();
+                    // Try fetching haptics
+                    const hapticRes = await fetch('gw150914_haptic_pattern.json');
+                    if (hapticRes.ok) hapticArray = await hapticRes.json();
                     
-                    // State Management: Enable button once data is ready
-                    button.disabled = false;
-                    button.textContent = "Experience GW150914";
-                    statusText.textContent = "Data loaded. Ready to play.";
-                    
-                } catch (error) {
-                    console.error("Failed to load haptic data:", error);
-                    statusText.textContent = "Error loading data. Ensure files are uploaded.";
-                    // We'll still enable the button to let them try the audio fallback
-                    button.disabled = false;
-                    button.textContent = "Play Audio Only";
+                    // Try fetching metadata
+                    const metaRes = await fetch('metadata.json');
+                    if (metaRes.ok) metadata = await metaRes.json();
+
+                } catch (e) {
+                    console.warn("Files not found locally, using default constraints. Ensure files are uploaded to root.");
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = "Experience GW150914";
+                    telemetry.innerHTML = "DATA LOADED<br>READY FOR PLAYBACK";
                 }
             }
 
-            // 3. The Synchronization Engine
-            button.addEventListener('click', () => {
-                // Error Handling for iOS / Unsupported devices
-                const isVibrateSupported = 'vibrate' in navigator;
-                
-                if (!isVibrateSupported && !hapticSupportAlerted) {
-                    alert("Notice: Your device or browser does not support the Web Haptic API. You will experience the audio portion only.");
-                    hapticSupportAlerted = true; // Only alert once
+            // Sync Engine: Animation Loop
+            function syncLoop() {
+                const t = audioObj.currentTime;
+                const mStart = metadata.merger[0];
+                const mEnd = metadata.merger[1];
+                const maxR = 110; // Max orbital radius in pixels
+
+                if (t > 0 && t < mStart) {
+                    // PHASE: INSPIRAL
+                    telemetry.className = "telemetry-text";
+                    telemetry.innerHTML = "PHASE: INSPIRAL<br>Black holes accelerating";
+                    container.classList.remove('merger-active');
+                    
+                    bh1.classList.remove('pulsing');
+                    bh2.style.opacity = '1';
+                    
+                    // Math for orbit: speed increases and radius shrinks exponentially as t approaches mStart
+                    const progress = Math.min(t / mStart, 1); 
+                    const radius = maxR * Math.pow(1 - progress, 0.35); // Shrinks curve
+                    const theta = 120 * Math.pow(progress, 4); // Spins exponentially faster
+
+                    bh1.style.transform = `translate(${radius * Math.cos(theta)}px, ${radius * Math.sin(theta)}px) scale(1)`;
+                    bh2.style.transform = `translate(${radius * Math.cos(theta + Math.PI)}px, ${radius * Math.sin(theta + Math.PI)}px) scale(1)`;
+
+                } else if (t >= mStart && t < mEnd) {
+                    // PHASE: MERGER
+                    telemetry.className = "telemetry-text merger-text";
+                    telemetry.innerHTML = "PHASE: MERGER<br>Collision and peak energy release";
+                    container.classList.add('merger-active');
+                    
+                    // Overlap into one circle
+                    bh2.style.opacity = '0';
+                    bh1.style.transform = `translate(0px, 0px) scale(1.8)`;
+                    bh1.classList.remove('pulsing');
+
+                } else if (t >= mEnd) {
+                    // PHASE: RINGDOWN
+                    telemetry.className = "telemetry-text";
+                    telemetry.innerHTML = "PHASE: RINGDOWN<br>Settling into a single black hole";
+                    container.classList.remove('merger-active');
+                    
+                    bh2.style.opacity = '0';
+                    bh1.style.transform = `translate(0px, 0px)`;
+                    bh1.classList.add('pulsing'); // CSS handles the pulsing scale
                 }
 
-                // Reset audio to start in case user presses play multiple times
+                // Continue loop if playing
+                if (!audioObj.paused && !audioObj.ended) {
+                    animationFrameId = requestAnimationFrame(syncLoop);
+                } else if (audioObj.ended) {
+                    resetUI();
+                }
+            }
+
+            function resetUI() {
+                telemetry.className = "telemetry-text";
+                telemetry.innerHTML = "EVENT COMPLETE<br>PRESS PLAY TO RESTART";
+                container.classList.remove('merger-active');
+                bh1.classList.remove('pulsing');
+                bh2.style.opacity = '1';
+                bh1.style.transform = `translate(${110}px, 0px) scale(1)`;
+                bh2.style.transform = `translate(${-110}px, 0px) scale(1)`;
+            }
+
+            // Initialization & Interaction
+            btn.addEventListener('click', () => {
+                if (!isVibrateSupported) {
+                    alert("Note: Web Haptics not supported on this device/browser. Playing audio and visualizer only.");
+                    isVibrateSupported = true; // Prevent multiple alerts
+                }
+
+                // Reset state
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
                 audioObj.currentTime = 0;
                 
-                // Fire Audio
-                audioObj.play().catch(e => {
-                    console.error("Audio playback failed:", e);
-                    alert("Audio playback blocked. Please ensure your phone is not on silent.");
+                // Fire Audio & Haptics Simultaneously
+                audioObj.play().then(() => {
+                    if ('vibrate' in navigator && hapticArray.length > 0) {
+                        navigator.vibrate(hapticArray);
+                    }
+                    animationFrameId = requestAnimationFrame(syncLoop);
+                }).catch(e => {
+                    console.error("Playback blocked:", e);
+                    alert("Audio playback was blocked by the browser. Please ensure your device is not on silent.");
                 });
-
-                // Fire Haptics simultaneously
-                if (isVibrateSupported && hapticArray.length > 0) {
-                    navigator.vibrate(hapticArray);
-                }
-                
-                statusText.textContent = "Experiencing merger...";
-                
-                // Reset status text after 15 seconds
-                setTimeout(() => {
-                    statusText.textContent = "Data loaded. Ready to play.";
-                }, 15000);
             });
 
-            // Initialize fetch
+            // Set initial positions
+            bh1.style.transform = `translate(${110}px, 0px)`;
+            bh2.style.transform = `translate(${-110}px, 0px)`;
+
             loadData();
         });
     </script>
