@@ -222,29 +222,34 @@
             audioObj.preload = 'auto';
 
             let hapticArray = [];
+            
+            // Updated default metadata to match the new backend structure
             let metadata = {
-                inspiral: [0.0, 13.8],
-                merger: [13.8, 14.2],
-                ringdown: [14.2, 15.0]
+                duration: 15.0,
+                phases: {
+                    inspiral: [0.0, 13.846],
+                    merger: [13.846, 14.2],
+                    ringdown: [14.2, 15.0]
+                }
             };
             
             let isVibrateSupported = 'vibrate' in navigator;
             let animationFrameId = null;
-            let hapticInterval = null; // New real-time haptic sync loop
+            let hapticInterval = null; // Real-time haptic sync loop
 
             // Fetch Data
             async function loadData() {
                 try {
-                    // Fetch the NEW floating point intensity array
+                    // Fetch the 20Hz floating point intensity array
                     const hapticRes = await fetch('gw150914_haptic_envelope.json');
                     if (hapticRes.ok) hapticArray = await hapticRes.json();
                     
-                    // Fetch metadata
+                    // Fetch nested metadata
                     const metaRes = await fetch('metadata.json');
                     if (metaRes.ok) metadata = await metaRes.json();
 
                 } catch (e) {
-                    console.warn("Files not found locally, using default constraints. Ensure files are uploaded to root.");
+                    console.warn("Files not found locally, using default fallback constraints.");
                 } finally {
                     btn.disabled = false;
                     btn.textContent = "Experience GW150914";
@@ -254,23 +259,18 @@
 
             // Real-Time Haptic Sync Engine
             function syncHaptics() {
-                // Stop the loop if audio pauses or finishes
                 if (audioObj.paused || audioObj.ended) {
                     clearInterval(hapticInterval);
                     return;
                 }
 
-                // Derive the exact current array index (20 samples per second)
+                // Derive current array index (20 samples per second)
                 let index = Math.floor(audioObj.currentTime * 20);
                 
                 if (index < hapticArray.length) {
                     let intensity = hapticArray[index];
-                    
                     if (intensity !== undefined) {
-                        // Calculate vibration duration for this exact 50ms window
                         let vibeTime = Math.round(intensity * 50);
-                        
-                        // Fire the motor
                         if (vibeTime > 0) {
                             navigator.vibrate(vibeTime);
                         }
@@ -281,11 +281,15 @@
             // Visual Sync Engine: UI Animation Loop
             function syncLoop() {
                 const t = audioObj.currentTime;
-                const mStart = metadata.merger[0];
-                const mEnd = metadata.merger[1];
+                
+                // FIXED: Safely extract merger times whether it's nested in "phases" or at root
+                const phases = metadata.phases ? metadata.phases : metadata;
+                const mStart = phases.merger[0];
+                const mEnd = phases.merger[1];
+                
                 const maxR = 110; // Max orbital radius in pixels
 
-                if (t > 0 && t < mStart) {
+                if (t >= 0 && t < mStart) {
                     // PHASE: INSPIRAL
                     telemetry.className = "telemetry-text";
                     telemetry.innerHTML = "PHASE: INSPIRAL<br>Black holes accelerating";
@@ -294,7 +298,7 @@
                     bh1.classList.remove('pulsing');
                     bh2.style.opacity = '1';
                     
-                    // Math for orbit: speed increases and radius shrinks exponentially
+                    // Orbital Math: Speed and tightness are linked strictly to the audio clock
                     const progress = Math.min(t / mStart, 1); 
                     const radius = maxR * Math.pow(1 - progress, 0.35); 
                     const theta = 120 * Math.pow(progress, 4); 
@@ -308,7 +312,7 @@
                     telemetry.innerHTML = "PHASE: MERGER<br>Collision and peak energy release";
                     container.classList.add('merger-active');
                     
-                    // Overlap into one circle
+                    // Overlap into one massive circle
                     bh2.style.opacity = '0';
                     bh1.style.transform = `translate(0px, 0px) scale(1.8)`;
                     bh1.classList.remove('pulsing');
@@ -321,7 +325,7 @@
                     
                     bh2.style.opacity = '0';
                     bh1.style.transform = `translate(0px, 0px)`;
-                    bh1.classList.add('pulsing'); 
+                    bh1.classList.add('pulsing'); // Pulse CSS takes over
                 }
 
                 // Continue loop if playing
@@ -341,7 +345,6 @@
                 bh1.style.transform = `translate(${110}px, 0px) scale(1)`;
                 bh2.style.transform = `translate(${-110}px, 0px) scale(1)`;
                 
-                // Clear hardware intervals
                 if (hapticInterval) clearInterval(hapticInterval);
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
             }
@@ -350,7 +353,7 @@
             btn.addEventListener('click', () => {
                 if (!isVibrateSupported) {
                     alert("Note: Web Haptics not supported on this device/browser. Playing audio and visualizer only.");
-                    isVibrateSupported = true; // Prevent multiple alerts
+                    isVibrateSupported = true;
                 }
 
                 // Reset state
@@ -359,11 +362,11 @@
                 
                 // Fire Audio & Start Synchronization Engines
                 audioObj.play().then(() => {
-                    // 1. Start continuous 50ms PWM Haptic Engine
+                    // 1. Continuous 50ms PWM Haptic Engine
                     if (isVibrateSupported && hapticArray.length > 0) {
                         hapticInterval = setInterval(syncHaptics, 50);
                     }
-                    // 2. Start Visuals
+                    // 2. Start Visual Loop
                     animationFrameId = requestAnimationFrame(syncLoop);
                 }).catch(e => {
                     console.error("Playback blocked:", e);
@@ -371,7 +374,7 @@
                 });
             });
 
-            // Set initial positions
+            // Set initial standby positions
             bh1.style.transform = `translate(${110}px, 0px)`;
             bh2.style.transform = `translate(${-110}px, 0px)`;
 
