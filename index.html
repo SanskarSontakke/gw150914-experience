@@ -298,10 +298,12 @@
                     bh1.classList.remove('pulsing');
                     bh2.style.opacity = '1';
                     
-                    // Orbital Math: Speed and tightness are linked strictly to the audio clock
+                    // Orbital Math: Base steady rotation + exponential speedup
                     const progress = Math.min(t / mStart, 1); 
                     const radius = maxR * Math.pow(1 - progress, 0.35); 
-                    const theta = 120 * Math.pow(progress, 4); 
+                    
+                    // FIXED: Added (t * 3) baseline speed so they spin visibly from second 0
+                    const theta = (t * 3) + 120 * Math.pow(progress, 4); 
 
                     bh1.style.transform = `translate(${radius * Math.cos(theta)}px, ${radius * Math.sin(theta)}px) scale(1)`;
                     bh2.style.transform = `translate(${radius * Math.cos(theta + Math.PI)}px, ${radius * Math.sin(theta + Math.PI)}px) scale(1)`;
