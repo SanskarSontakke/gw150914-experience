@@ -3,46 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GW150914 Experience</title>
+    <title>GW150914: Multisensory Translation</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --text-high: rgba(255, 255, 255, 0.87);
-            --text-med: rgba(255, 255, 255, 0.60);
+            --bg-color: #050505;
+            --surface-color: #121212;
+            --text-high: #f4f4f5;
+            --text-med: #a1a1aa;
             --accent: #00e5ff;
-            --accent-glow: rgba(0, 229, 255, 0.6);
-            --disabled-bg: #333333;
-            --disabled-text: rgba(255, 255, 255, 0.38);
+            --accent-hover: #00b3cc;
+            --accent-glow: rgba(0, 229, 255, 0.4);
+            --danger: #ff0055;
+            --disabled-bg: #27272a;
+            --disabled-text: #52525b;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body, html {
             background-color: var(--bg-color);
+            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
             color: var(--text-high);
-            height: 100%;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
-        .container {
+        /* --- Header Section --- */
+        .app-header {
+            text-align: center;
+            padding: 3rem 1.5rem 1rem;
+            max-width: 800px;
             width: 100%;
-            max-width: 400px;
-            padding: 24px;
+            z-index: 10;
+        }
+
+        .app-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .app-header h2 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text-med);
+            line-height: 1.6;
+        }
+
+        /* --- Main Content & Container --- */
+        .main-content {
+            flex: 1;
+            width: 100%;
+            max-width: 480px;
+            padding: 1rem 1.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
-            transition: all 0.1s ease;
             position: relative;
+            z-index: 5;
         }
 
         /* Screen Shake for Merger Phase */
@@ -60,153 +93,376 @@
             100% { transform: translate(1px, -2px) rotate(-0.5deg); }
         }
 
-        .merger-active {
+        .merger-active .visualizer-container,
+        .merger-active .telemetry-box,
+        .merger-active #experience-btn,
+        .merger-active .context-panel {
             animation: screenShake 0.1s infinite;
         }
 
         /* Ambient Glow for Merger */
         .merger-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 150vw;
-            height: 150vh;
-            background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, rgba(18,18,18,0) 70%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(0,229,255,0.08) 0%, transparent 60%);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.1s;
+            transition: opacity 0.2s ease-in-out;
             z-index: -1;
         }
 
         .merger-active .merger-glow {
             opacity: 1;
+            background: radial-gradient(circle at center, rgba(255,0,85,0.15) 0%, transparent 60%);
         }
 
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        /* --- Orbital Visualizer --- */
+        .visualizer-container {
+            position: relative;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            display: flex;
+            justify-content: center;
         }
 
-        /* Orbital Visualizer */
         .visualizer {
             position: relative;
-            width: 260px;
-            height: 260px;
-            margin: 40px 0;
+            width: 280px;
+            height: 280px;
             border-radius: 50%;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             justify-content: center;
+            background: repeating-radial-gradient(
+                circle at center,
+                rgba(255,255,255,0.02) 0,
+                rgba(255,255,255,0.02) 1px,
+                transparent 1px,
+                transparent 20px
+            );
+        }
+        
+        .visualizer::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px dashed rgba(0, 229, 255, 0.2);
+            animation: spin 30s linear infinite;
+        }
+        
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
         }
 
         .black-hole {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             background-color: #fff;
             border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px var(--accent-glow);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px var(--accent-glow);
             top: 50%;
             left: 50%;
-            margin-top: -12px;
-            margin-left: -12px;
-            transition: opacity 0.2s, transform 0s; /* JS handles transform frame-by-frame */
+            margin-top: -10px;
+            margin-left: -10px;
+            transition: opacity 0.2s, transform 0s;
+            z-index: 2;
+        }
+        
+        .merger-active .black-hole {
+             box-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 60px rgba(255, 0, 85, 0.8);
         }
 
-        /* Ringdown Pulse Animation */
         @keyframes ringdownPulse {
-            0% { transform: scale(1.5); box-shadow: 0 0 20px #fff, 0 0 50px var(--accent); opacity: 1; }
-            100% { transform: scale(1.0); box-shadow: 0 0 5px #fff, 0 0 15px var(--accent-glow); opacity: 0.6; }
+            0% { transform: scale(1.8); box-shadow: 0 0 30px #fff, 0 0 80px var(--accent); opacity: 1; }
+            100% { transform: scale(1.0); box-shadow: 0 0 10px #fff, 0 0 20px var(--accent-glow); opacity: 0.7; }
         }
 
         .pulsing {
             animation: ringdownPulse 0.8s cubic-bezier(0.1, 0.7, 0.1, 1) infinite alternate;
         }
 
-        /* Live Telemetry Display */
+        /* --- Live Telemetry Display --- */
         .telemetry-box {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(0, 229, 255, 0.3);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            border-left: 3px solid var(--accent);
             border-radius: 8px;
-            padding: 16px;
+            padding: 1.2rem;
             width: 100%;
-            min-height: 80px;
+            min-height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 32px;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 14px;
-            font-weight: bold;
+            margin-bottom: 2rem;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
             color: var(--accent);
             text-transform: uppercase;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        
+        .telemetry-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.3;
         }
 
         .telemetry-text {
             text-align: center;
-            line-height: 1.4;
+            line-height: 1.5;
+            letter-spacing: 0.05em;
         }
 
         .merger-text {
             color: #fff;
-            text-shadow: 0 0 8px var(--accent);
-            font-size: 15px;
+            text-shadow: 0 0 10px var(--danger);
+        }
+        
+        .merger-active .telemetry-box {
+            border-left-color: var(--danger);
+            color: var(--danger);
         }
 
-        /* Action Button */
+        /* --- Action Button --- */
         button {
             width: 100%;
-            padding: 18px 24px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 12px;
-            background-color: var(--accent);
-            color: #000;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
-            touch-action: manipulation;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        button:active:not(:disabled) {
-            transform: scale(0.97);
-            background-color: #00b3cc;
-        }
-
-        button:disabled {
+            padding: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
             background-color: var(--disabled-bg);
             color: var(--disabled-text);
             cursor: not-allowed;
-            box-shadow: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Glowing state when loaded */
+        button.ready {
+            background-color: var(--accent);
+            color: #000;
+            cursor: pointer;
+            border-color: transparent;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3), 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        button.ready:hover {
+            transform: translateY(-2px);
+            background-color: var(--accent-hover);
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.4), 0 12px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        button.ready:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- Context Panel --- */
+        .context-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            width: 100%;
+            text-align: left;
+        }
+
+        .context-panel h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-med);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .context-panel h3::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .context-panel p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-high);
+        }
+
+        /* --- Author Footer --- */
+        .app-footer {
+            width: 100%;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            margin-top: auto;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        }
+
+        .app-footer p {
+            font-size: 0.9rem;
+            color: var(--text-med);
+        }
+
+        .footer-links {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-med);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0%;
+            height: 1px;
+            background: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* --- Mobile Optimization --- */
+        @media (max-width: 480px) {
+            .visualizer {
+                width: 240px;
+                height: 240px;
+            }
+            .app-header h1 {
+                font-size: 1.75rem;
+            }
+            .telemetry-box {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* --- Large Screen Optimization --- */
+        @media (min-width: 768px) {
+            .app-header {
+                padding-top: 4rem;
+                padding-bottom: 2rem;
+            }
+            .app-header h1 {
+                font-size: 2.75rem;
+            }
+            .app-header h2 {
+                font-size: 1.25rem;
+            }
+            .main-content {
+                max-width: 600px;
+                justify-content: center;
+            }
+            .visualizer-container {
+                padding: 3rem;
+                margin-bottom: 2.5rem;
+            }
+            .visualizer {
+                width: 340px;
+                height: 340px;
+            }
+            .telemetry-box {
+                font-size: 1.1rem;
+                min-height: 100px;
+                margin-bottom: 2.5rem;
+            }
+            button {
+                font-size: 1.25rem;
+                padding: 1.4rem;
+            }
+            .context-panel {
+                padding: 2rem;
+                margin-top: 3rem;
+            }
+            .context-panel h3 {
+                font-size: 1rem;
+            }
+            .context-panel p {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-container">
+    <header class="app-header">
+        <h1>GW150914 Translation</h1>
+        <h2>Translating Gravitational Waves into Synchronized Audio-Haptic Feedback</h2>
+    </header>
+
+    <div class="main-content" id="main-container">
         <div class="merger-glow"></div>
-        <h1>GW150914</h1>
-        
-        <div class="visualizer" id="visualizer">
-            <div class="black-hole" id="bh1"></div>
-            <div class="black-hole" id="bh2"></div>
+
+        <div class="visualizer-container">
+            <div class="visualizer" id="visualizer">
+                <div class="black-hole" id="bh1"></div>
+                <div class="black-hole" id="bh2"></div>
+            </div>
         </div>
 
         <div class="telemetry-box">
             <div class="telemetry-text" id="telemetry">SYSTEM STANDBY<br>AWAITING DATA</div>
         </div>
-        
-        <button id="experience-btn" disabled>Loading Data...</button>
+
+        <button id="experience-btn" disabled>Initializing Systems...</button>
+
+        <div class="context-panel">
+            <h3>Mission Context</h3>
+            <p>This experience utilizes real LIGO strain data from the first-ever detected binary black hole merger. The original 1.5-second signal has been mathematically time-dilated 10x and pitch-shifted to align with human auditory and haptic perception.</p>
+        </div>
     </div>
+
+    <footer class="app-footer">
+        <p>Research & Engineering by Sanskar Sontakke</p>
+        <div class="footer-links">
+            <a href="#">Repository</a>
+            <a href="#">Research Paper</a>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -215,15 +471,15 @@
             const container = document.getElementById('main-container');
             const bh1 = document.getElementById('bh1');
             const bh2 = document.getElementById('bh2');
-            
+
             // Core Assets
             const AUDIO_FILE = 'gw150914_shifted_chirp.wav';
             const audioObj = new Audio(AUDIO_FILE);
             audioObj.preload = 'auto';
 
             let hapticArray = [];
-            
-            // Updated default metadata to match the new backend structure
+
+            // Default metadata structure matches Python output
             let metadata = {
                 duration: 15.0,
                 phases: {
@@ -232,7 +488,7 @@
                     ringdown: [14.2, 15.0]
                 }
             };
-            
+
             let isVibrateSupported = 'vibrate' in navigator;
             let animationFrameId = null;
             let hapticInterval = null; // Real-time haptic sync loop
@@ -243,7 +499,7 @@
                     // Fetch the 20Hz floating point intensity array
                     const hapticRes = await fetch('gw150914_haptic_envelope.json');
                     if (hapticRes.ok) hapticArray = await hapticRes.json();
-                    
+
                     // Fetch nested metadata
                     const metaRes = await fetch('metadata.json');
                     if (metaRes.ok) metadata = await metaRes.json();
@@ -252,6 +508,7 @@
                     console.warn("Files not found locally, using default fallback constraints.");
                 } finally {
                     btn.disabled = false;
+                    btn.classList.add('ready'); // Triggers the glowing UI state
                     btn.textContent = "Experience GW150914";
                     telemetry.innerHTML = "DATA LOADED<br>READY FOR PLAYBACK";
                 }
@@ -266,7 +523,7 @@
 
                 // Derive current array index (20 samples per second)
                 let index = Math.floor(audioObj.currentTime * 20);
-                
+
                 if (index < hapticArray.length) {
                     let intensity = hapticArray[index];
                     if (intensity !== undefined) {
@@ -281,12 +538,12 @@
             // Visual Sync Engine: UI Animation Loop
             function syncLoop() {
                 const t = audioObj.currentTime;
-                
-                // FIXED: Safely extract merger times whether it's nested in "phases" or at root
+
+                // Safely extract merger times (nested in "phases" or root)
                 const phases = metadata.phases ? metadata.phases : metadata;
                 const mStart = phases.merger[0];
                 const mEnd = phases.merger[1];
-                
+
                 const maxR = 110; // Max orbital radius in pixels
 
                 if (t >= 0 && t < mStart) {
@@ -294,16 +551,14 @@
                     telemetry.className = "telemetry-text";
                     telemetry.innerHTML = "PHASE: INSPIRAL<br>Black holes accelerating";
                     container.classList.remove('merger-active');
-                    
+
                     bh1.classList.remove('pulsing');
                     bh2.style.opacity = '1';
-                    
+
                     // Orbital Math: Base steady rotation + exponential speedup
-                    const progress = Math.min(t / mStart, 1); 
-                    const radius = maxR * Math.pow(1 - progress, 0.35); 
-                    
-                    // FIXED: Added (t * 3) baseline speed so they spin visibly from second 0
-                    const theta = (t * 3) + 120 * Math.pow(progress, 4); 
+                    const progress = Math.min(t / mStart, 1);
+                    const radius = maxR * Math.pow(1 - progress, 0.35);
+                    const theta = (t * 3) + 120 * Math.pow(progress, 4); // Immediate spin fix
 
                     bh1.style.transform = `translate(${radius * Math.cos(theta)}px, ${radius * Math.sin(theta)}px) scale(1)`;
                     bh2.style.transform = `translate(${radius * Math.cos(theta + Math.PI)}px, ${radius * Math.sin(theta + Math.PI)}px) scale(1)`;
@@ -313,7 +568,7 @@
                     telemetry.className = "telemetry-text merger-text";
                     telemetry.innerHTML = "PHASE: MERGER<br>Collision and peak energy release";
                     container.classList.add('merger-active');
-                    
+
                     // Overlap into one massive circle
                     bh2.style.opacity = '0';
                     bh1.style.transform = `translate(0px, 0px) scale(1.8)`;
@@ -324,7 +579,7 @@
                     telemetry.className = "telemetry-text";
                     telemetry.innerHTML = "PHASE: RINGDOWN<br>Settling into a single black hole";
                     container.classList.remove('merger-active');
-                    
+
                     bh2.style.opacity = '0';
                     bh1.style.transform = `translate(0px, 0px)`;
                     bh1.classList.add('pulsing'); // Pulse CSS takes over
@@ -346,7 +601,7 @@
                 bh2.style.opacity = '1';
                 bh1.style.transform = `translate(${110}px, 0px) scale(1)`;
                 bh2.style.transform = `translate(${-110}px, 0px) scale(1)`;
-                
+
                 if (hapticInterval) clearInterval(hapticInterval);
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
             }
@@ -361,7 +616,7 @@
                 // Reset state
                 resetUI();
                 audioObj.currentTime = 0;
-                
+
                 // Fire Audio & Start Synchronization Engines
                 audioObj.play().then(() => {
                     // 1. Continuous 50ms PWM Haptic Engine
