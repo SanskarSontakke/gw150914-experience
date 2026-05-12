@@ -1,6 +1,10 @@
 # 🌌 GW150914: Multisensory Astrophysics Experience
 
-![GW150914 Experience Web App Interface](PLACE_YOUR_IMAGE_URL_HERE)
+![GW150914 Experience Web App Interface]
+
+
+https://github.com/user-attachments/assets/be0a612f-125f-44ae-a83f-6dc566568e07
+
 
 **Translating Gravitational Waves into Synchronized Audio-Haptic Feedback for Consumer Mobile Devices.**
 
