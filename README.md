@@ -1,53 +1,58 @@
-# 🌌 Multisensory Astrophysics: GW150914 Audio-Haptic Experience
+# 🌌 GW150914: Multisensory Astrophysics Experience
 
-**Translating Gravitational Wave Signals into Synchronized Audio-Haptic Experiences for Consumer Mobile Devices.**
+![GW150914 Experience Web App Interface](PLACE_YOUR_IMAGE_URL_HERE)
 
-This project bridges theoretical astrophysics and modern web accessibility by translating the raw, time-series data of the first observed binary black hole merger (GW150914) into a synchronized audio and haptic experience. It is designed to be experienced directly on consumer Android smartphones via a web browser, requiring zero setup or app installations.
+**Translating Gravitational Waves into Synchronized Audio-Haptic Feedback for Consumer Mobile Devices.**
+
+This project bridges theoretical astrophysics and modern web accessibility by translating the raw, time-series data of the first observed binary black hole merger (GW150914) into an interactive, synchronized audio, visual, and haptic experience. It is designed to be experienced directly on consumer Android smartphones via a web browser, requiring zero setup or app installations.
 
 ## 🚀 Live Demo
-**Experience it here:** [Link to your GitHub Pages site - e.g., https://sanskarsontakke.github.io/gw150914-experience] 
+**Experience it here:** [Link to your GitHub Pages site - e.g., https://yoursite.github.io/gw150914-experience] 
 *(Note: For the haptic vibration to work, you must open this link on an **Android smartphone**.)*
 
 ## 📖 Project Overview
 
 On September 14, 2015, LIGO detected **GW150914**, the ripples in spacetime caused by two black holes colliding over a billion light-years away. The raw data of this event is a microscopic spatial strain ($10^{-21}$ meters). 
 
-While astrophysics typically relies on visual graphs, this project asks: *What if you could feel the fabric of spacetime rippling?*
+While astrophysics typically relies on visual graphs, this project asks: *What if you could see, hear, and physically feel the fabric of spacetime rippling?*
 
-By utilizing advanced Digital Signal Processing (DSP) and Web APIs, this project maps the exact physical amplitude and frequency of the black hole "inspiral" phase into human-perceptible audio ranges and localized vibration patterns.
+By utilizing advanced Digital Signal Processing (DSP) and Web APIs, this project maps the exact physical amplitude and frequency of the black hole "inspiral" phase into human-perceptible audio ranges, perfectly synced to localized mobile vibration patterns and numerical relativity video simulations.
 
-## ✨ Features
+## ✨ Key Features
 
-* **Sample-Accurate Synchronization:** The Web Audio API and HTML5 `navigator.vibrate()` API are perfectly coupled using a custom JavaScript look-ahead scheduler, ensuring millisecond precision between sound and touch.
-* **15-Second Crescendo:** The original 0.2-second physical collision was scientifically time-dilated by a factor of 10x to create a dramatic 15-second build-up, allowing human perception to fully register the "chirp" morphology.
+* **Master-Clock Media Engine:** A custom JavaScript architecture that uses an HTML5 video simulation as the "master clock." This allows users to scrub, pause, and play the event while keeping the audio track and haptic firing perfectly locked to the video frames.
+* **Real-Time Haptic PWM Synchronization:** To bypass mobile browser limits on long vibration arrays, the web app utilizes a real-time `requestAnimationFrame` loop. It samples a 20Hz amplitude envelope array ($[0.0, 1.0]$) and translates it into dynamic Pulse Width Modulation (PWM) commands using the `navigator.vibrate()` API every 50 milliseconds.
+* **15-Second Crescendo:** The original 0.2-second physical collision was mathematically time-dilated by a factor of 10x to create a dramatic 15-second build-up, allowing human perception to fully register the "chirp" morphology.
 * **Perceptual Scaling:** The haptic data utilizes Stevens' Power Law (Gamma correction) to ensure the vibration amplitude feels like a natural physical crescendo to the human nervous system.
-* **Mobile-First Accessibility:** Built with an APCA-compliant high-contrast dark theme (#121212) to prevent OLED black-smearing and reduce visual clutter.
 
-## ⚙️ How It Works (The Pipeline)
+## ⚙️ The Technical Architecture
 
-### 1. Data Processing (Python / Colab)
+### 1. Data Engineering & DSP (Python / Colab)
 * Fetched 4096 Hz raw strain data from the Gravitational Wave Open Science Center (GWOSC) using `pycbc` and `gwpy`.
-* Applied spectral whitening (Welch's method) and a 20 Hz - 300 Hz zero-phase Butterworth bandpass filter to remove seismic noise and isolate the chirp.
-* **Audio Branch:** Executed a Phase Vocoder algorithm to pitch-shift the fundamental frequencies into the optimal human hearing range, exporting as a 44.1 kHz 16-bit `.wav` file.
-* **Haptic Branch:** Extracted the amplitude envelope, applied time-dilation, and mathematically simulated varying vibration intensities using Pulse-Width Modulation (PWM) across a 20 ms cycle, exporting as a structured `.json` array.
+* Applied spectral whitening (Welch's method) and a 20 Hz - 300 Hz zero-phase Butterworth bandpass filter to remove seismic noise and isolate the astrophysical chirp.
+* **Audio Branch:** Executed a high-quality pitch-shifting algorithm to raise the fundamental frequencies into the optimal human hearing range, exporting as a 15-second, 44.1 kHz 16-bit `.wav` file.
+* **Haptic Branch:** Extracted the analytic signal envelope using a Hilbert transform, applied a low-pass smoothing filter, downsampled to exactly 20Hz, and exported as a floating-point JSON array.
 
 ### 2. Frontend Delivery (Web)
-* A lightweight, single-file (`index.html`) web architecture.
-* Fetches the `.wav` and `.json` assets asynchronously.
-* Connects the hardware-backed `AudioContext` clock with a `requestAnimationFrame` loop to feed the vibration arrays to the mobile actuator in perfect sync with the audio track.
+* A lightweight, single-file (`index.html`) web architecture built with mobile-first UI principles and an APCA-compliant high-contrast dark theme (`#121212`) to prevent OLED black-smearing.
+* Fetches the `.wav` audio, `.json` haptic array, and `.mp4` visual simulation.
+* Evaluates the relative timestamps in real-time, executing the specific sensory outputs only during the precise 15-second collision window within the larger 42-second video track.
 
 ## 📂 Repository Structure
 
-* `index.html` - The core application, UI, and synchronization engine.
-* `gw150914_shifted_chirp.wav` - The processed 15-second audio file.
-* `gw150914_haptic_pattern.json` - The 15-second PWM vibration array mapped for the Vibrate API.
+* `index.html`: The core application, UI, and synchronization engine.
+* `gw150914_shifted_chirp.wav`: The processed 15-second audio file.
+* `gw150914_haptic_envelope.json`: The 300-sample (20Hz) amplitude array driving the haptics.
+* `Simulation of GW150914 720p.mp4`: The numerical relativity video simulation.
 
 ## ⚠️ Compatibility Note
 
-* **Android:** Fully supported (Chrome, Edge, Firefox, Brave).
-* **iOS (iPhone/iPad):** Apple's WebKit currently severely restricts the `navigator.vibrate()` API. iOS users will be able to see the UI and hear the audio, but the haptic feedback will not fire. 
+* **Android:** Fully supported (Chrome, Edge, Firefox, Brave). Provides the full visual, auditory, and haptic experience.
+* **iOS (iPhone/iPad):** Apple's WebKit currently severely restricts the `navigator.vibrate()` API. iOS users will experience the synchronized video and audio, but the haptic feedback will not fire. 
 * **Desktop:** Desktops do not have vibration motors. Please use a smartphone for the full experience.
 
-## 🔬 Data Credits
+## 🔬 Credits & Citations
 
-This research uses open data provided by the [Gravitational Wave Open Science Center](https://gwosc.org), a service of LIGO Laboratory, the LIGO Scientific Collaboration, the Virgo Collaboration, and KAGRA.
+* **Scientific Data:** This research uses open data provided by the [Gravitational Wave Open Science Center](https://gwosc.org), a service of LIGO Laboratory, the LIGO Scientific Collaboration, the Virgo Collaboration, and KAGRA.
+* **Visual Simulation:** Visual simulation generated by the Simulating eXtreme Spacetimes (SXS) Project and the Max Planck Institute for Gravitational Physics.
+* **Engineering & Architecture:** Developed by Sanskar Sontakke.
