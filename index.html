@@ -16,8 +16,15 @@
             --danger: #ff0055;
             --disabled-bg: #27272a;
             --disabled-text: #52525b;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
         * {
@@ -37,47 +44,49 @@
             align-items: center;
             overflow-x: hidden;
             scroll-behavior: smooth;
+            width: 100%;
         }
 
         /* --- Header Section --- */
         .app-header {
             text-align: center;
-            padding: 3rem 1.5rem 1rem;
-            max-width: 800px;
+            padding: 1.5rem 1rem 1rem;
+            max-width: 100%;
             width: 100%;
             z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
         }
 
         .app-header h1 {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
             background: linear-gradient(to right, #fff, #a1a1aa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         .app-header h2 {
-            font-size: 1.1rem;
+            font-size: 0.85rem;
             font-weight: 400;
             color: var(--text-med);
-            line-height: 1.6;
+            line-height: 1.4;
         }
 
         /* --- Main Content & Container --- */
         .main-content {
             flex: 1;
             width: 100%;
-            max-width: 480px;
-            padding: 1rem 1.5rem;
+            max-width: 100%;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
             z-index: 5;
         }
-
         /* Screen Shake for Merger Phase */
         @keyframes screenShake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
@@ -93,9 +102,8 @@
             100% { transform: translate(1px, -2px) rotate(-0.5deg); }
         }
 
-        .merger-active .visualizer-container,
         .merger-active .telemetry-box,
-        .merger-active #experience-btn,
+        .merger-active .video-player,
         .merger-active .context-panel {
             animation: screenShake 0.1s infinite;
         }
@@ -118,98 +126,186 @@
             opacity: 1;
             background: radial-gradient(circle at center, rgba(255,0,85,0.15) 0%, transparent 60%);
         }
-
-        /* --- Orbital Visualizer --- */
-        .visualizer-container {
-            position: relative;
-            padding: 2rem;
+        /* Screen Shake for Merger Phase */
+        .video-player {
+            width: 100%;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            margin-bottom: 2rem;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 1rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            display: flex;
-            justify-content: center;
+            max-width: 100%;
         }
 
-        .visualizer {
+        .video-wrapper {
             position: relative;
-            width: 280px;
-            height: 280px;
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            min-height: 200px;
+        }
+
+        #video-element {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        .video-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(18, 18, 18, 0.95);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .control-slider {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-height: 32px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.05s linear;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.15);
+            outline: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+            transition: all 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            width: 18px;
+            height: 18px;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 1);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            width: 18px;
+            height: 18px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+            transition: all 0.15s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            width: 18px;
+            height: 18px;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 1);
+        }
+
+        .time-display {
+            font-size: 0.8rem;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            color: var(--text-med);
+            min-width: 55px;
+            text-align: right;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .playback-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.75rem;
+            min-height: 36px;
+        }
+
+        .play-pause-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: repeating-radial-gradient(
-                circle at center,
-                rgba(255,255,255,0.02) 0,
-                rgba(255,255,255,0.02) 1px,
-                transparent 1px,
-                transparent 20px
-            );
-        }
-        
-        .visualizer::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 1px dashed rgba(0, 229, 255, 0.2);
-            animation: spin 30s linear infinite;
-        }
-        
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        .black-hole {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px var(--accent-glow);
-            top: 50%;
-            left: 50%;
-            margin-top: -10px;
-            margin-left: -10px;
-            transition: opacity 0.2s, transform 0s;
-            z-index: 2;
-        }
-        
-        .merger-active .black-hole {
-             box-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 60px rgba(255, 0, 85, 0.8);
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            color: #000;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            padding: 0;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        @keyframes ringdownPulse {
-            0% { transform: scale(1.8); box-shadow: 0 0 30px #fff, 0 0 80px var(--accent); opacity: 1; }
-            100% { transform: scale(1.0); box-shadow: 0 0 10px #fff, 0 0 20px var(--accent-glow); opacity: 0.7; }
+        .play-pause-btn:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+            transform: scale(1.08);
         }
 
-        .pulsing {
-            animation: ringdownPulse 0.8s cubic-bezier(0.1, 0.7, 0.1, 1) infinite alternate;
+        .play-pause-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
         }
 
         /* --- Live Telemetry Display --- */
         .telemetry-box {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid var(--glass-border);
             border-left: 3px solid var(--accent);
-            border-radius: 8px;
-            padding: 1.2rem;
+            border-radius: var(--radius-md);
+            padding: 1rem;
             width: 100%;
-            min-height: 90px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--accent);
             text-transform: uppercase;
@@ -229,8 +325,8 @@
 
         .telemetry-text {
             text-align: center;
-            line-height: 1.5;
-            letter-spacing: 0.05em;
+            line-height: 1.4;
+            letter-spacing: 0.03em;
         }
 
         .merger-text {
@@ -243,62 +339,23 @@
             color: var(--danger);
         }
 
-        /* --- Action Button --- */
-        button {
-            width: 100%;
-            padding: 1.2rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px;
-            background-color: var(--disabled-bg);
-            color: var(--disabled-text);
-            cursor: not-allowed;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            touch-action: manipulation;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Glowing state when loaded */
-        button.ready {
-            background-color: var(--accent);
-            color: #000;
-            cursor: pointer;
-            border-color: transparent;
-            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3), 0 8px 16px rgba(0, 0, 0, 0.4);
-        }
-
-        button.ready:hover {
-            transform: translateY(-2px);
-            background-color: var(--accent-hover);
-            box-shadow: 0 0 40px rgba(0, 229, 255, 0.4), 0 12px 20px rgba(0, 0, 0, 0.5);
-        }
-
-        button.ready:active {
-            transform: translateY(1px);
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4);
-        }
-
         /* --- Context Panel --- */
         .context-panel {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 2rem 0;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin: 1rem 0;
             width: 100%;
             text-align: left;
         }
 
         .context-panel h3 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             color: var(--text-med);
             margin-bottom: 0.75rem;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -307,43 +364,49 @@
         .context-panel h3::before {
             content: '';
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background: var(--accent);
             border-radius: 50%;
         }
 
         .context-panel p {
-            font-size: 0.95rem;
-            line-height: 1.6;
+            font-size: 0.9rem;
+            line-height: 1.5;
             color: var(--text-high);
+            margin-bottom: 0.75rem;
+        }
+
+        .context-panel p:last-child {
+            margin-bottom: 0;
         }
 
         /* --- Author Footer --- */
         .app-footer {
             width: 100%;
-            padding: 2rem 1.5rem;
+            padding: 1.5rem 1rem;
             text-align: center;
             margin-top: auto;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
         }
 
         .app-footer p {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-med);
         }
 
         .footer-links {
-            margin-top: 1rem;
+            margin-top: 0.75rem;
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
             color: var(--text-med);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             transition: all 0.2s ease;
             position: relative;
         }
@@ -369,60 +432,148 @@
         
         /* --- Mobile Optimization --- */
         @media (max-width: 480px) {
-            .visualizer {
-                width: 240px;
-                height: 240px;
+            .app-header {
+                padding: 1rem 0.75rem 0.75rem;
             }
             .app-header h1 {
-                font-size: 1.75rem;
+                font-size: 1.3rem;
+            }
+            .app-header h2 {
+                font-size: 0.8rem;
+            }
+            .main-content {
+                padding: 0.75rem;
+            }
+            .video-player {
+                margin-bottom: 0.75rem;
+                border-radius: var(--radius-md);
+            }
+            .video-controls {
+                padding: 0.6rem;
             }
             .telemetry-box {
+                font-size: 0.75rem;
+                min-height: 60px;
+                padding: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+            .context-panel {
+                padding: 1rem;
+                margin: 0.75rem 0;
+            }
+            .context-panel h3 {
+                font-size: 0.75rem;
+            }
+            .context-panel p {
                 font-size: 0.85rem;
+            }
+            .play-pause-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            .time-display {
+                font-size: 0.75rem;
+                min-width: 50px;
+            }
+            .app-footer {
+                padding: 1rem 0.75rem;
+            }
+            .footer-links {
+                gap: 0.75rem;
+            }
+        }
+
+        /* --- Tablet Optimization --- */
+        @media (min-width: 481px) and (max-width: 767px) {
+            .app-header {
+                padding: 1.5rem 1rem;
+            }
+            .app-header h1 {
+                font-size: 1.8rem;
+            }
+            .app-header h2 {
+                font-size: 0.95rem;
+            }
+            .main-content {
+                max-width: 100%;
+                padding: 1rem;
+            }
+            .video-player {
+                max-width: 100%;
+                margin-bottom: 1.25rem;
+            }
+            .telemetry-box {
+                font-size: 0.9rem;
+                min-height: 75px;
+                margin-bottom: 1.25rem;
+            }
+            .context-panel {
+                padding: 1.5rem;
+            }
+            .play-pause-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 1.1rem;
             }
         }
 
         /* --- Large Screen Optimization --- */
         @media (min-width: 768px) {
             .app-header {
-                padding-top: 4rem;
-                padding-bottom: 2rem;
+                padding: 2rem 1.5rem 1.5rem;
             }
+            .app-header h1 {
+                font-size: 2.5rem;
+            }
+            .app-header h2 {
+                font-size: 1.1rem;
+            }
+            .main-content {
+                max-width: 800px;
+                margin: 0 auto;
+                width: 100%;
+                padding: 1.5rem;
+            }
+            .video-player {
+                margin-bottom: 1.5rem;
+                max-width: 100%;
+            }
+            .telemetry-box {
+                font-size: 1rem;
+                min-height: 85px;
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+            .context-panel {
+                padding: 1.75rem;
+            }
+            .context-panel h3 {
+                font-size: 0.95rem;
+            }
+            .context-panel p {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+            .play-pause-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
             .app-header h1 {
                 font-size: 2.75rem;
             }
-            .app-header h2 {
-                font-size: 1.25rem;
-            }
             .main-content {
-                max-width: 600px;
-                justify-content: center;
+                max-width: 850px;
             }
-            .visualizer-container {
-                padding: 3rem;
-                margin-bottom: 2.5rem;
-            }
-            .visualizer {
-                width: 340px;
-                height: 340px;
-            }
-            .telemetry-box {
-                font-size: 1.1rem;
-                min-height: 100px;
-                margin-bottom: 2.5rem;
-            }
-            button {
-                font-size: 1.25rem;
-                padding: 1.4rem;
-            }
-            .context-panel {
-                padding: 2rem;
-                margin-top: 3rem;
-            }
-            .context-panel h3 {
-                font-size: 1rem;
-            }
-            .context-panel p {
-                font-size: 1.1rem;
+        }
+
+        @media (min-width: 1200px) {
+            .main-content {
+                max-width: 900px;
             }
         }
     </style>
@@ -437,22 +588,32 @@
     <div class="main-content" id="main-container">
         <div class="merger-glow"></div>
 
-        <div class="visualizer-container">
-            <div class="visualizer" id="visualizer">
-                <div class="black-hole" id="bh1"></div>
-                <div class="black-hole" id="bh2"></div>
+        <!-- Custom Video Player -->
+        <div class="video-player" id="video-player">
+            <div class="video-wrapper">
+                <video id="video-element" preload="metadata"></video>
+            </div>
+            <div class="video-controls">
+                <div class="control-slider">
+                    <input type="range" id="progress-slider" min="0" max="100" value="0" step="0.1">
+                    <div class="time-display">
+                        <span id="current-time">0:00</span> / <span id="duration-time">0:00</span>
+                    </div>
+                </div>
+                <div class="playback-controls">
+                    <button class="play-pause-btn" id="play-pause-btn">▶</button>
+                </div>
             </div>
         </div>
 
         <div class="telemetry-box">
-            <div class="telemetry-text" id="telemetry">SYSTEM STANDBY<br>AWAITING DATA</div>
+            <div class="telemetry-text" id="telemetry">INITIALIZING VIDEO PLAYER<br>VIDEO LOADING...</div>
         </div>
 
-        <button id="experience-btn" disabled>Initializing Systems...</button>
-
         <div class="context-panel">
-            <h3>Mission Context</h3>
-            <p>This experience utilizes real LIGO strain data from the first-ever detected binary black hole merger. The original 1.5-second signal has been mathematically time-dilated 10x and pitch-shifted to align with human auditory and haptic perception.</p>
+            <h3>About This Data</h3>
+            <p>This experience visualizes the first-ever detected binary black hole merger, GW150914, captured by LIGO on September 14, 2015. The 42-second video simulation shows the inspiral, merger, and ringdown phases synchronized with audio and haptic feedback.</p>
+            <p>Video simulation courtesy of the Simulating eXtreme Spacetimes (SXS) Project and the Max Planck Institute for Gravitational Physics. The audio represents the gravitational wave strain data time-dilated and pitch-shifted for human perception.</p>
         </div>
     </div>
 
@@ -466,176 +627,230 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const btn = document.getElementById('experience-btn');
+            const videoElement = document.getElementById('video-element');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const progressSlider = document.getElementById('progress-slider');
+            const currentTimeDisplay = document.getElementById('current-time');
+            const durationDisplay = document.getElementById('duration-time');
             const telemetry = document.getElementById('telemetry');
             const container = document.getElementById('main-container');
-            const bh1 = document.getElementById('bh1');
-            const bh2 = document.getElementById('bh2');
 
             // Core Assets
-            const AUDIO_FILE = 'gw150914_shifted_chirp.wav';
+            const VIDEO_FILE = 'gw150914_visual.mp4'; // 42s video
+            const AUDIO_FILE = 'gw150914_shifted_chirp.wav'; // 15s audio
             const audioObj = new Audio(AUDIO_FILE);
             audioObj.preload = 'auto';
 
             let hapticArray = [];
 
-            // Default metadata structure matches Python output
-            let metadata = {
-                duration: 15.0,
-                phases: {
-                    inspiral: [0.0, 13.846],
-                    merger: [13.846, 14.2],
-                    ringdown: [14.2, 15.0]
-                }
-            };
+            // Sync Parameters
+            const SYNC_WINDOW_START = 12.954; // When audio/haptics start (in video time)
+            const SYNC_WINDOW_END = 27.954;   // When audio/haptics end (in video time)
+            const VIDEO_MERGER_PEAK = 26.5;   // Video merger peak
+            const MERGER_END = 27.2;          // End of merger phase
+            const AUDIO_DURATION = 15.0;
+            const AUDIO_MERGER_PEAK = 13.846; // Audio merger peak
+            const HAPTIC_SAMPLE_RATE = 20;    // 20 Hz samples
 
             let isVibrateSupported = 'vibrate' in navigator;
             let animationFrameId = null;
-            let hapticInterval = null; // Real-time haptic sync loop
+            let hapticInterval = null;
+            let isScrubbing = false;
 
-            // Fetch Data
-            async function loadData() {
+            // Format time as M:SS
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // Fetch haptic data
+            async function loadHapticData() {
                 try {
-                    // Fetch the 20Hz floating point intensity array
                     const hapticRes = await fetch('gw150914_haptic_envelope.json');
-                    if (hapticRes.ok) hapticArray = await hapticRes.json();
-
-                    // Fetch nested metadata
-                    const metaRes = await fetch('metadata.json');
-                    if (metaRes.ok) metadata = await metaRes.json();
-
+                    if (hapticRes.ok) {
+                        hapticArray = await hapticRes.json();
+                    }
                 } catch (e) {
-                    console.warn("Files not found locally, using default fallback constraints.");
-                } finally {
-                    btn.disabled = false;
-                    btn.classList.add('ready'); // Triggers the glowing UI state
-                    btn.textContent = "Experience GW150914";
-                    telemetry.innerHTML = "DATA LOADED<br>READY FOR PLAYBACK";
+                    console.warn("Haptic file not found, haptics disabled.");
                 }
             }
 
-            // Real-Time Haptic Sync Engine
-            function syncHaptics() {
-                if (audioObj.paused || audioObj.ended) {
-                    clearInterval(hapticInterval);
-                    return;
+            // Update progress bar
+            function updateProgress() {
+                const duration = videoElement.duration;
+                if (duration > 0) {
+                    const percent = (videoElement.currentTime / duration) * 100;
+                    progressSlider.value = percent;
+                    currentTimeDisplay.textContent = formatTime(videoElement.currentTime);
                 }
+            }
 
-                // Derive current array index (20 samples per second)
-                let index = Math.floor(audioObj.currentTime * 20);
+            // Sync audio to video
+            function syncAudio() {
+                const videoTime = videoElement.currentTime;
 
-                if (index < hapticArray.length) {
-                    let intensity = hapticArray[index];
-                    if (intensity !== undefined) {
-                        let vibeTime = Math.round(intensity * 50);
-                        if (vibeTime > 0) {
-                            navigator.vibrate(vibeTime);
+                if (videoTime >= SYNC_WINDOW_START && videoTime <= SYNC_WINDOW_END) {
+                    // Within sync window: play audio
+                    const audioTime = videoTime - SYNC_WINDOW_START;
+
+                    if (audioObj.paused && !videoElement.paused) {
+                        audioObj.currentTime = audioTime;
+                        audioObj.play().catch(e => console.warn("Audio play blocked:", e));
+                    } else if (!audioObj.paused) {
+                        // Keep audio in sync
+                        const diff = Math.abs(audioObj.currentTime - audioTime);
+                        if (diff > 0.1) {
+                            audioObj.currentTime = audioTime;
+                        }
+                    }
+                } else {
+                    // Outside sync window: pause audio
+                    if (!audioObj.paused) {
+                        audioObj.pause();
+                    }
+                }
+            }
+
+            // Real-time haptic sync engine
+            function syncHaptics() {
+                const videoTime = videoElement.currentTime;
+
+                if (videoTime >= SYNC_WINDOW_START && videoTime <= SYNC_WINDOW_END && !videoElement.paused) {
+                    const hapticTime = videoTime - SYNC_WINDOW_START;
+                    let index = Math.floor(hapticTime * HAPTIC_SAMPLE_RATE);
+
+                    if (index < hapticArray.length && index >= 0) {
+                        let intensity = hapticArray[index];
+                        if (intensity !== undefined && intensity > 0) {
+                            let vibeTime = Math.round(intensity * 50);
+                            if (vibeTime > 0 && isVibrateSupported) {
+                                navigator.vibrate(vibeTime);
+                            }
                         }
                     }
                 }
             }
 
-            // Visual Sync Engine: UI Animation Loop
-            function syncLoop() {
-                const t = audioObj.currentTime;
+            // Visual sync engine: update telemetry and black hole positions
+            function syncVisuals() {
+                const videoTime = videoElement.currentTime;
 
-                // Safely extract merger times (nested in "phases" or root)
-                const phases = metadata.phases ? metadata.phases : metadata;
-                const mStart = phases.merger[0];
-                const mEnd = phases.merger[1];
-
-                const maxR = 110; // Max orbital radius in pixels
-
-                if (t >= 0 && t < mStart) {
+                if (videoTime >= 0 && videoTime < VIDEO_MERGER_PEAK) {
                     // PHASE: INSPIRAL
                     telemetry.className = "telemetry-text";
                     telemetry.innerHTML = "PHASE: INSPIRAL<br>Black holes accelerating";
                     container.classList.remove('merger-active');
 
-                    bh1.classList.remove('pulsing');
-                    bh2.style.opacity = '1';
-
-                    // Orbital Math: Base steady rotation + exponential speedup
-                    const progress = Math.min(t / mStart, 1);
-                    const radius = maxR * Math.pow(1 - progress, 0.35);
-                    const theta = (t * 3) + 120 * Math.pow(progress, 4); // Immediate spin fix
-
-                    bh1.style.transform = `translate(${radius * Math.cos(theta)}px, ${radius * Math.sin(theta)}px) scale(1)`;
-                    bh2.style.transform = `translate(${radius * Math.cos(theta + Math.PI)}px, ${radius * Math.sin(theta + Math.PI)}px) scale(1)`;
-
-                } else if (t >= mStart && t < mEnd) {
+                } else if (videoTime >= VIDEO_MERGER_PEAK && videoTime < MERGER_END) {
                     // PHASE: MERGER
                     telemetry.className = "telemetry-text merger-text";
                     telemetry.innerHTML = "PHASE: MERGER<br>Collision and peak energy release";
                     container.classList.add('merger-active');
 
-                    // Overlap into one massive circle
-                    bh2.style.opacity = '0';
-                    bh1.style.transform = `translate(0px, 0px) scale(1.8)`;
-                    bh1.classList.remove('pulsing');
-
-                } else if (t >= mEnd) {
+                } else if (videoTime >= MERGER_END) {
                     // PHASE: RINGDOWN
                     telemetry.className = "telemetry-text";
                     telemetry.innerHTML = "PHASE: RINGDOWN<br>Settling into a single black hole";
                     container.classList.remove('merger-active');
-
-                    bh2.style.opacity = '0';
-                    bh1.style.transform = `translate(0px, 0px)`;
-                    bh1.classList.add('pulsing'); // Pulse CSS takes over
-                }
-
-                // Continue loop if playing
-                if (!audioObj.paused && !audioObj.ended) {
-                    animationFrameId = requestAnimationFrame(syncLoop);
-                } else if (audioObj.ended) {
-                    resetUI();
                 }
             }
 
-            function resetUI() {
-                telemetry.className = "telemetry-text";
-                telemetry.innerHTML = "EVENT COMPLETE<br>PRESS PLAY TO RESTART";
-                container.classList.remove('merger-active');
-                bh1.classList.remove('pulsing');
-                bh2.style.opacity = '1';
-                bh1.style.transform = `translate(${110}px, 0px) scale(1)`;
-                bh2.style.transform = `translate(${-110}px, 0px) scale(1)`;
-
-                if (hapticInterval) clearInterval(hapticInterval);
-                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            // Main animation frame loop (master clock)
+            function mainSyncLoop() {
+                if (!videoElement.paused && !videoElement.ended) {
+                    updateProgress();
+                    syncAudio();
+                    syncVisuals();
+                    animationFrameId = requestAnimationFrame(mainSyncLoop);
+                }
             }
 
-            // Initialization & Interaction
-            btn.addEventListener('click', () => {
-                if (!isVibrateSupported) {
-                    alert("Note: Web Haptics not supported on this device/browser. Playing audio and visualizer only.");
-                    isVibrateSupported = true;
+            // Play/Pause toggle
+            playPauseBtn.addEventListener('click', () => {
+                if (videoElement.paused) {
+                    videoElement.play().catch(e => console.warn("Video play blocked:", e));
+                    playPauseBtn.textContent = '⏸';
+                    mainSyncLoop();
+                } else {
+                    videoElement.pause();
+                    playPauseBtn.textContent = '▶';
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                    if (hapticInterval) clearInterval(hapticInterval);
                 }
-
-                // Reset state
-                resetUI();
-                audioObj.currentTime = 0;
-
-                // Fire Audio & Start Synchronization Engines
-                audioObj.play().then(() => {
-                    // 1. Continuous 50ms PWM Haptic Engine
-                    if (isVibrateSupported && hapticArray.length > 0) {
-                        hapticInterval = setInterval(syncHaptics, 50);
-                    }
-                    // 2. Start Visual Loop
-                    animationFrameId = requestAnimationFrame(syncLoop);
-                }).catch(e => {
-                    console.error("Playback blocked:", e);
-                    alert("Audio playback was blocked by the browser. Please ensure your device is not on silent.");
-                });
             });
 
-            // Set initial standby positions
-            bh1.style.transform = `translate(${110}px, 0px)`;
-            bh2.style.transform = `translate(${-110}px, 0px)`;
+            // Progress slider: scrubbing
+            progressSlider.addEventListener('mousedown', () => {
+                isScrubbing = true;
+            });
 
-            loadData();
+            progressSlider.addEventListener('touchstart', () => {
+                isScrubbing = true;
+            });
+
+            progressSlider.addEventListener('change', (e) => {
+                const percent = e.target.value;
+                const duration = videoElement.duration;
+                videoElement.currentTime = (percent / 100) * duration;
+                isScrubbing = false;
+                updateProgress();
+                syncVisuals();
+                syncAudio();
+            });
+
+            progressSlider.addEventListener('input', (e) => {
+                if (isScrubbing) {
+                    const percent = e.target.value;
+                    const duration = videoElement.duration;
+                    videoElement.currentTime = (percent / 100) * duration;
+                    updateProgress();
+                    syncVisuals();
+                }
+            });
+
+            // Video metadata loaded
+            videoElement.addEventListener('loadedmetadata', () => {
+                durationDisplay.textContent = formatTime(videoElement.duration);
+                progressSlider.max = 100;
+                telemetry.innerHTML = "VIDEO READY<br>PRESS PLAY TO START";
+            });
+
+            // Video ended
+            videoElement.addEventListener('ended', () => {
+                playPauseBtn.textContent = '▶';
+                telemetry.innerHTML = "EVENT COMPLETE<br>PRESS PLAY TO RESTART";
+                container.classList.remove('merger-active');
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                if (hapticInterval) clearInterval(hapticInterval);
+                if (!audioObj.paused) audioObj.pause();
+            });
+
+            // Error handling
+            videoElement.addEventListener('error', (e) => {
+                telemetry.innerHTML = "ERROR LOADING VIDEO<br>CHECK FILE PATH";
+                console.error("Video error:", e);
+            });
+
+            audioObj.addEventListener('error', (e) => {
+                console.warn("Audio error:", e);
+            });
+
+            // Set video source
+            videoElement.src = VIDEO_FILE;
+
+            // Set initial UI state
+            playPauseBtn.textContent = '▶';
+
+            // Haptic sync interval (50ms)
+            setInterval(() => {
+                if (!videoElement.paused) {
+                    syncHaptics();
+                }
+            }, 50);
+
+            // Load haptic data on startup
+            loadHapticData();
         });
     </script>
 </body>
